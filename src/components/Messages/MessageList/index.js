@@ -98,6 +98,7 @@ export class MessageList extends MemoizedComponent {
 		uid,
 		conversationFinishedMessage,
 		typingUsernames,
+		onDisable,
 	}) => {
 		const items = [];
 
@@ -122,6 +123,8 @@ export class MessageList extends MemoizedComponent {
 					key={message._id}
 					attachmentResolver={attachmentResolver}
 					avatarResolver={avatarResolver}
+					onDisable={onDisable}
+					lastIndex={ i === messages.length - 1 }
 					use="li"
 					me={uid && message.u && uid === message.u._id}
 					compact={nextMessage && message.u && nextMessage.u && message.u._id === nextMessage.u._id}

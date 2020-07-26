@@ -15,11 +15,17 @@ import RemoveIcon from '../../icons/remove.svg';
 import SendIcon from '../../icons/send.svg';
 import EmojiIcon from '../../icons/smile.svg';
 
-
 export default class Chat extends Component {
 	state = {
 		atBottom: true,
 		text: '',
+		disable: false,
+		disableText: '',
+	}
+
+	disableInput = (disable = false, text = "Please Wait") => {
+		console.log('here');
+		this.setState({ disable, text });
 	}
 
 	handleFilesDropTargetRef = (ref) => {
@@ -93,6 +99,8 @@ export default class Chat extends Component {
 	}, {
 		atBottom = true,
 		text,
+		disable,
+		disableText,
 	}) => (
 		<Screen
 			color={color}
@@ -124,6 +132,7 @@ export default class Chat extends Component {
 							conversationFinishedMessage={conversationFinishedMessage}
 							lastReadMessageId={lastReadMessageId}
 							onScrollTo={this.handleScrollTo}
+							onDisable={this.disableInput}
 						/>
 					</div>
 				</Screen.Content>
@@ -147,12 +156,14 @@ export default class Chat extends Component {
 					<Composer onUpload={onUpload}
 						onSubmit={this.handleSubmit}
 						onChange={this.handleChangeText}
-						placeholder={I18n.t('Type your message here')}
+						placeholder={disable ? disableText : I18n.t('Type your message here')}
+						disable={disable}
 						value={text}
+						style={disable && {background: "#f2f2f2"}}
 						pre={emoji && (
 							<ComposerActions>
 								<ComposerAction>
-									<EmojiIcon width={20} />
+									<EmojiIcon width={20} style={disable && { color: styles.bgColorDisable }} />
 								</ComposerAction>
 							</ComposerActions>
 						)}
@@ -160,12 +171,12 @@ export default class Chat extends Component {
 							<ComposerActions>
 								{text.length === 0 && uploads && (
 									<ComposerAction onClick={this.handleUploadClick}>
-										<PlusIcon width={20} />
+										<PlusIcon width={20} style={disable && { color: styles.bgColorDisable }} />
 									</ComposerAction>
 								)}
 								{text.length > 0 && (
 									<ComposerAction onClick={this.handleSendClick}>
-										<SendIcon width={20} />
+										<SendIcon width={20} style={disable && { color: styles.bgColorDisable }} />
 									</ComposerAction>
 								)}
 							</ComposerActions>

@@ -21,7 +21,7 @@ import {
 } from '../constants';
 
 
-const renderContent = ({ text, system, quoted, me, attachments, attachmentResolver }) => [
+const renderContent = ({ text, system, quoted, me, attachments, attachmentResolver, onDisable, lastIndex }) => [
 	text && (
 		<MessageBubble inverse={me} quoted={quoted}>
 			<MessageText text={text} system={system} />
@@ -60,6 +60,8 @@ const renderContent = ({ text, system, quoted, me, attachments, attachmentResolv
 				&& <MessageAction
 					quoted={false}
 					actions={attachment.actions}
+					onDisable={onDisable}
+					lastIndex={lastIndex}
 				/>),
 		),
 ].filter(Boolean);
@@ -88,6 +90,8 @@ const getMessageUsernames = (compact, message) => {
 
 export const Message = memo(({
 	avatarResolver,
+	onDisable,
+	lastIndex,
 	attachmentResolver = getAttachmentUrl,
 	use,
 	ts,
@@ -116,6 +120,8 @@ export const Message = memo(({
 				me,
 				attachments: message.attachments,
 				attachmentResolver,
+				onDisable,
+				lastIndex,
 			})}
 		</MessageContent>
 		{!compact && <MessageTime ts={ts} />}

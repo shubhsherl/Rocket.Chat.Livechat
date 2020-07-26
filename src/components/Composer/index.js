@@ -172,7 +172,7 @@ export class Composer extends Component {
 		replaceCaret(el);
 	}
 
-	render = ({ pre, post, value, placeholder, onChange, onSubmit, onUpload, className, style }) => (
+	render = ({ pre, post, value, placeholder, onChange, onSubmit, onUpload, className, style, disable }) => (
 		<div className={createClassName(styles, 'composer', { }, [className])} style={style}>
 			{pre}
 			<div
@@ -182,7 +182,7 @@ export class Composer extends Component {
 						dangerouslySetInnerHTML: {
 							__html: parse(value),
 						},
-						contentEditable: true,
+						contentEditable: !disable,
 						'data-placeholder': placeholder,
 						onInput: this.handleInput(onChange),
 						onKeypress: this.handleKeypress(onSubmit),

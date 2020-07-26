@@ -18,8 +18,12 @@ export const MessageAction = memo(({
 	url,
 	className,
 	actions,
+	onDisable,
+	lastIndex,
 	closeChat = async () => {
 		const rid = store.state.room._id;
+
+		lastIndex && onDisable && onDisable(false, '');
 
 		await Promise.all([
 			Livechat.closeChat({ rid }),
@@ -30,6 +34,7 @@ export const MessageAction = memo(({
 		const rid = store.state.room._id;
 
 		const randommsg = generateRandomString(5);
+		lastIndex && onDisable && onDisable(false, '');
 
 		await Promise.all([
 			Livechat.sendMessage({ msg: randommsg, token, rid }),
@@ -38,6 +43,7 @@ export const MessageAction = memo(({
 	getSessionId = async () => {
 		const { token } = store.state;
 		const rid = store.state.room._id;
+		lastIndex && onDisable && onDisable(false, '');
 
 		await Promise.all([
 			Livechat.sendMessage({ msg: 'initiate_salesforce_session', token, rid }),
@@ -46,6 +52,7 @@ export const MessageAction = memo(({
 	sendMessage = async (el) => {
 		const { token } = store.state;
 		const rid = store.state.room._id;
+		lastIndex && onDisable && onDisable(false, '');
 
 		await Promise.all([
 			Livechat.sendMessage({ msg: el.target.value, token, rid }),
@@ -68,8 +75,9 @@ export const MessageAction = memo(({
 		className={createClassName(styles, 'attachment-component', {}, [className])}
 		{...messageBubbleProps}
 	>
-		{actions.map(({ text, msg }) =>
-			addButton(text, msg),
-		)}
+		{actions.map(({ text, msg, disableInputMessage, disableInput }) => {
+			disableInput && lastIndex && onDisable && onDisable(true, disableInputMessage);
+			return addButton(text, msg);
+		})}
 	</MessageBubble>
 ));
