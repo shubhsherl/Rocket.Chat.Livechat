@@ -188,6 +188,7 @@ export class Composer extends Component {
 						onKeypress: this.handleKeypress(onSubmit),
 						onPaste: this.handlePaste(onUpload),
 						onDrop: this.handleDrop(onUpload),
+						style: (disable && {"font-color": "#e0364d"})
 					}
 				)}
 				className={createClassName(styles, 'composer__input')}

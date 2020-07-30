@@ -20,11 +20,9 @@ export default class Chat extends Component {
 		atBottom: true,
 		text: '',
 		disable: false,
-		disableText: '',
 	}
 
 	disableInput = (disable = false, text = "Please Wait") => {
-		console.log('here');
 		this.setState({ disable, text });
 	}
 
@@ -54,11 +52,19 @@ export default class Chat extends Component {
 
 	handleUploadClick = (event) => {
 		event.preventDefault();
+		const { disable } = this.state;
+		if (disable) {
+			return;
+		}
 		this.filesDropTarget.browse();
 	}
 
 	handleSendClick = (event) => {
 		event.preventDefault();
+		const { disable } = this.state;
+		if (disable) {
+			return;
+		}
 		this.handleSubmit(this.state.text);
 	}
 
@@ -99,8 +105,7 @@ export default class Chat extends Component {
 	}, {
 		atBottom = true,
 		text,
-		disable,
-		disableText,
+		disable = false,
 	}) => (
 		<Screen
 			color={color}
@@ -156,14 +161,14 @@ export default class Chat extends Component {
 					<Composer onUpload={onUpload}
 						onSubmit={this.handleSubmit}
 						onChange={this.handleChangeText}
-						placeholder={disable ? disableText : I18n.t('Type your message here')}
+						placeholder={I18n.t('Type your message here')}
 						disable={disable}
 						value={text}
-						style={disable && {background: "#f2f2f2"}}
+						style={disable && { background: styles.bgColorDisable }}
 						pre={emoji && (
 							<ComposerActions>
 								<ComposerAction>
-									<EmojiIcon width={20} style={disable && { color: styles.bgColorDisable }} />
+									<EmojiIcon width={20} style={disable && { color: styles.colorIconDisable }} />
 								</ComposerAction>
 							</ComposerActions>
 						)}
@@ -171,12 +176,12 @@ export default class Chat extends Component {
 							<ComposerActions>
 								{text.length === 0 && uploads && (
 									<ComposerAction onClick={this.handleUploadClick}>
-										<PlusIcon width={20} style={disable && { color: styles.bgColorDisable }} />
+										<PlusIcon width={20} style={disable && { color: styles.colorIconDisable }} />
 									</ComposerAction>
 								)}
 								{text.length > 0 && (
 									<ComposerAction onClick={this.handleSendClick}>
-										<SendIcon width={20} style={disable && { color: styles.bgColorDisable }} />
+										<SendIcon width={20} style={disable && { color: styles.colorIconDisable }} />
 									</ComposerAction>
 								)}
 							</ComposerActions>
