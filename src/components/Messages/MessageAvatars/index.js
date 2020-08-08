@@ -5,6 +5,8 @@ import styles from './styles.scss';
 export const MessageAvatars = memo(({
 	avatarResolver = () => null,
 	usernames = [],
+	isVisitor = false,
+	name = null,
 	className,
 	style = {},
 }) => (
@@ -14,7 +16,7 @@ export const MessageAvatars = memo(({
 	>
 		{usernames.map((username) => (
 			<Avatar
-				src={avatarResolver(username)}
+				src={avatarResolver(username, isVisitor, name)}
 				description={username}
 				className={createClassName(styles, 'message-avatars__avatar')}
 			/>

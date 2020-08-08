@@ -19,6 +19,7 @@ import {
 	MESSAGE_TYPE_WELCOME,
 	MESSAGE_TYPE_LIVECHAT_CLOSED,
 } from '../constants';
+import { tr } from 'date-fns/locale';
 
 
 const renderContent = ({ text, system, quoted, me, attachments, attachmentResolver, onDisable, lastIndex }) => [
@@ -75,6 +76,15 @@ const getSystemMessageText = ({ t, conversationFinishedMessage }) =>
 	|| (t === MESSAGE_TYPE_WELCOME && I18n.t('Welcome'))
 	|| (t === MESSAGE_TYPE_LIVECHAT_CLOSED && (conversationFinishedMessage || I18n.t('Conversation finished')));
 
+const getName = (message) => {
+	if (!message.u) {
+		return null;
+	}
+
+	const { alias, u: { name } } = message;
+	return alias && name;
+};
+
 const getMessageUsernames = (compact, message) => {
 	if (compact || !message.u) {
 		return [];
@@ -112,6 +122,8 @@ export const Message = memo(({
 		<MessageAvatars
 			avatarResolver={avatarResolver}
 			usernames={getMessageUsernames(compact, message)}
+			isVisitor={me}
+			name={getName(message)}
 		/>
 		<MessageContent reverse={me}>
 			{renderContent({

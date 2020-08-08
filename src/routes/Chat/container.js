@@ -110,6 +110,19 @@ export class ChatContainer extends Component {
 		this.startTyping({ rid: room._id, username: user.username });
 	}
 
+	getAvatar = (username, isVisitor = false, name = null) => {
+		// if (!isVisitor || name) {
+			return getAvatarUrl(username);
+		// }
+		// if (name) {
+		// 	return `@${ name }`;
+		// }
+
+		const { defaultAvatar } = this.props;
+		const avatar = `${ Livechat.client.host }/${ defaultAvatar.url || defaultAvatar.defaultUrl }`;
+		return avatar;
+	}
+
 	handleSubmit = async (msg) => {
 		if (msg.trim() === '') {
 			return;
@@ -118,12 +131,14 @@ export class ChatContainer extends Component {
 		await this.grantUser();
 		const { _id: rid } = await this.getRoom();
 		const { alerts, dispatch, token, user } = this.props;
+		console.log(user);
+		const avatar = this.getAvatar(user.username, true, null);
 
 		try {
 			this.stopTypingDebounced.stop();
 			await Promise.all([
 				this.stopTyping({ rid, username: user.username }),
-				Livechat.sendMessage({ msg, token, rid }),
+				Livechat.sendMessage({ msg, token, rid, avatar }),
 			]);
 		} catch (error) {
 			const { data: { error: reason } } = error;
@@ -315,7 +330,7 @@ export class ChatContainer extends Component {
 	render = ({ user, ...props }) => (
 		<Chat
 			{...props}
-			avatarResolver={getAvatarUrl}
+			avatarResolver={this.getAvatar}
 			uid={user && user._id}
 			onTop={this.handleTop}
 			onChangeText={this.handleChangeText}
@@ -337,6 +352,7 @@ export const ChatConnector = ({ ref, ...props }) => (
 			config: {
 				settings: {
 					fileUpload: uploads,
+					guestDefaultAvatar: defaultAvatar,
 					allowSwitchingDepartments,
 					forceAcceptDataProcessingConsent: allowRemoveUserData,
 					showConnecting,
@@ -412,6 +428,7 @@ export const ChatConnector = ({ ref, ...props }) => (
 				connecting={!!(room && !agent && (showConnecting || queueInfo))}
 				dispatch={dispatch}
 				departments={departments}
+				defaultAvatar={defaultAvatar}
 				allowSwitchingDepartments={allowSwitchingDepartments}
 				conversationFinishedMessage={conversationFinishedMessage || I18n.t('Conversation finished')}
 				allowRemoveUserData={allowRemoveUserData}
