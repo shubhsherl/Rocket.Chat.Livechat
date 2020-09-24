@@ -12,24 +12,51 @@ import { defaultRoomParams, initRoom } from './room';
 const agentCacheExpiry = 3600000;
 let agentPromise;
 
+const sendMessage = async (msg) => {
+	const { token, agent } = store.state;
+	const ts = new Date();
+
+	const message = {
+		msg,
+		token,
+		u: agent,
+		ts: ts.toISOString(),
+		_id: createToken(),
+		trigger: true,
+	};
+
+	await store.setState({
+		triggered: true,
+		messages: upsert(store.state.messages, message, ({ _id }) => _id === message._id, ({ ts }) => ts),
+	});
+	await processUnread();
+}
+
 const registerGuestAndCreateSession = async (triggerAction) => {
 	const { alerts, room, token } = store.state;
 	if (room) {
 		return room;
 	}
-	
+
 	store.setState({ loading: true });
-	
+
 	try {
-		const { params } = triggerAction;
-		const guest = { token: token || createToken(), department: params && params.department };
+		const { params: { department = null, msg = null } = {} } = triggerAction;
+		const guest = { token: token || createToken(), department };
 		store.setState(guest);
+
 		const user = await Livechat.grantVisitor({ visitor: { ...guest } });
 		store.setState({ user });
+
 		const roomParams = defaultRoomParams();
 		const newRoom = await Livechat.room(roomParams);
 		store.setState({ room: newRoom });
+
 		await initRoom();
+
+		if (msg) {
+			await sendMessage(msg);
+		}
 
 		parentCall('callback', 'chat-started');
 		return newRoom;
@@ -127,7 +154,7 @@ class Triggers {
 	}
 
 	async fire(trigger) {
-		const { token, user, firedTriggers = [] } = store.state;
+		const { user, firedTriggers = [] } = store.state;
 		if (!this._enabled || user || trigger.skip) {
 			return;
 		}
@@ -138,27 +165,12 @@ class Triggers {
 				trigger.skip = true;
 
 				getAgent(action).then(async (agent) => {
-					const ts = new Date();
-
-					const message = {
-						msg: action.params.msg,
-						token,
-						u: agent,
-						ts: ts.toISOString(),
-						_id: createToken(),
-						trigger: true,
-					};
-
-					await store.setState({
-						triggered: true,
-						messages: upsert(store.state.messages, message, ({ _id }) => _id === message._id, ({ ts }) => ts),
-					});
-					await processUnread();
-
 					if (agent && agent._id) {
 						await store.setState({ agent });
 						parentCall('callback', ['assign-agent', normalizeAgent(agent)]);
 					}
+
+					await sendMessage(action.params.msg);
 
 					route('/');
 					parentCall('openWidget');
@@ -217,7 +229,7 @@ class Triggers {
 						store.on('change', ([state, prevState]) => {
 							if (prevState.minimized && !state.minimized && !self._inProgress[trigger._id]) {
 								self._inProgress[trigger._id] = true;
-								self.fire(trigger).then(()=> {
+								self.fire(trigger).then(() => {
 									self._inProgress[trigger._id] = false;
 								});
 							}
